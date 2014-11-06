@@ -20,10 +20,10 @@ int main(int argc, char *argv[]){
 	*/
 
 	if (res >= 0) {
-			strcpy((char *)res, "Hello");
-			printf("%s\n", (char *)res);
-			mprotect((void *)res, 4096, PROT_NONE);
-			printf("%s\n", (char *)res);
+			//strcpy((char *)res, "Hello");
+			printf("%lu\n", res);
+			//mprotect((void *)res, 4096, PROT_NONE);
+			//printf("%s\n", (char *)res);
 
 	} else {	/* Printing the proper error description. */
 		perror("ERROR");
