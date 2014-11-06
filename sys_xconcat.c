@@ -1,43 +1,35 @@
 #include <linux/linkage.h>
 #include <linux/moduleloader.h>
-#include <linux/fs.h>
 #include <linux/mm.h>
-#include <linux/compiler.h>
-#include <linux/file.h>
-#include <linux/fsnotify.h>
-#include <linux/uaccess.h>
-#include <linux/unistd.h>
-#include <linux/slab.h>
-#include <linux/stat.h>
-#include <linux/fcntl.h>
 #include <linux/mman.h>
-#include "tps.h"
+#include <linux/sched.h>
+#include <linux/err.h>
+#include <linux/syscalls.h>
 
 asmlinkage extern long (*sysptr)(void *arg, int argslen);
 
+unsigned long res;
 
-void list_implementation(void){
-		
-	
-	init_queue();	
+void process(int arg){
 
+	//mutex_lock(&tps_mutex);	
+	//init_queue();	
 
-	enQueue(1000, 2000, 12345, 4096);
-	enQueue(1001, 2001, 12345, 4096);
-	enQueue(1002, 2002, 12345, 4096);
-	enQueue(1003, 2003, 12345, 4096);
+	res = do_mmap(0, 0, arg, PROT_WRITE | PROT_READ, MAP_SHARED, 0);
 
+	if(!IS_ERR_VALUE(res)){
+		enQueue(current->tgid, current->pid, res, arg);	
+	}
+	else{
+		printk("Mmap failed \n");
+	}
 
-	display();
-
-	deinit_queue();
-	display();
+	//mutex_unlock(&tps_mutex);
 }
 
 
 asmlinkage long xconcat(void *arg, int argslen)
 {
-	unsigned long res = 0;
 	//void *access = NULL;
 	//void *ptr = NULL;
 	//ptr = kmalloc(argslen, GFP_KERNEL);
@@ -49,13 +41,14 @@ asmlinkage long xconcat(void *arg, int argslen)
 
 	//res = do_mmap(0, 0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, 0);
 	//printk("res mmap: %p \n", (void *)res);
-	list_implementation();
+	process(argslen);
 
 	return res;
 }
 
 static int __init init_sys_xconcat(void)
 {
+	//mutex_init(&tps_mutex);
 	printk(KERN_INFO "installed new sys_xconcat module\n");
 	if (sysptr == NULL)
 		sysptr = xconcat;
@@ -67,6 +60,8 @@ static void  __exit exit_sys_xconcat(void)
 	if (sysptr != NULL)
 		sysptr = NULL;
 	printk(KERN_INFO "removed sys_xconcat module\n");
+	display();
+	deinit_queue();
 }
 
 module_init(init_sys_xconcat);
