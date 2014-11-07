@@ -3,6 +3,7 @@
 #include <linux/mm.h>
 #include <linux/mman.h>
 #include <linux/sched.h>
+#include <linux/slab.h>
 #include <linux/err.h>
 #include <linux/syscalls.h>
 
@@ -10,9 +11,78 @@ asmlinkage extern long (*sysptr)(void *arg, int argslen);
 
 unsigned long res;
 
+/*
+void dequeue_entry(){
+				if(var == current->mm->tps_head){
+					current->mm->tps_head = var->next;
+					kfree(var);
+					return;
+				}
+				else{
+					prev->next = var->next;
+					kfree(var);
+					return;
+				}
+			 	
+			}
+			else{
+
+				prev = var;
+				var = var->next;
+			}
+}
+
+bool dequeue_entry(unsigned long addr, int len){
+
+	struct tps_list *var = current->mm->tps_head;
+	struct tps_list *prev = NULL;
+
+	if(var != NULL){
+		while(var != NULL){
+			
+			if(!((addr > (var->addr + var->len)) || ((addr + len) < var->addr))){
+
+			if((var->addr == addr) && (var->len == len)){
+
+				if(((var->process_id == current->tgid) && (var->thread_id == current->pid))){
+		
+					printk("Match !!!!!!!!!!!!!\n");
+					if(var == current->mm->tps_head){
+						current->mm->tps_head = var->next;						kfree(var);
+						return true;
+					}
+					else{
+						prev->next = var->next;
+						kfree(var);
+						return true;
+					}
+				}
+				else{
+					prev = var;
+					var = var->next;
+				}		
+
+			}
+			else{
+				prev = var;
+				var = var->next;
+			}	
+
+		}
+		else{
+			prev = var;
+			var = var->next;
+		}
+	}	
+	}		
+	else{
+		//continue
+	}	
+	return false;
+}*/
+
 void process(int arg){
 
-	//mutex_lock(&tps_mutex);	
 	//init_queue();	
 
 	res = do_mmap(0, 0, arg, PROT_WRITE | PROT_READ, MAP_SHARED, 0);
@@ -23,26 +93,12 @@ void process(int arg){
 	else{
 		printk("Mmap failed \n");
 	}
-
-	//mutex_unlock(&tps_mutex);
 }
 
 
 asmlinkage long xconcat(void *arg, int argslen)
 {
-	//void *access = NULL;
-	//void *ptr = NULL;
-	//ptr = kmalloc(argslen, GFP_KERNEL);
-
-	//res = copy_from_user(ptr, arg, argslen);
-
-	//printk("res: %lu \n", res);
-	//printk("ptr: %s \n", (char *)ptr);
-
-	//res = do_mmap(0, 0, 4096, PROT_READ | PROT_WRITE, MAP_SHARED, 0);
-	//printk("res mmap: %p \n", (void *)res);
-	process(argslen);
-
+	process(argslen);	
 	return res;
 }
 
@@ -61,7 +117,7 @@ static void  __exit exit_sys_xconcat(void)
 		sysptr = NULL;
 	printk(KERN_INFO "removed sys_xconcat module\n");
 	display();
-	deinit_queue();
+	//deinit_queue();
 }
 
 module_init(init_sys_xconcat);
