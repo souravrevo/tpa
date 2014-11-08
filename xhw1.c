@@ -26,7 +26,7 @@ void *thread1(void *t){
 	strcpy((void *)res ,"Hello syssec");
 	if (res >= 0) {
 			printf("%s\n", (char *)res);
-			//global = res;
+			global = res;
 
 	} else {	/* Printing the proper error description. */
 		perror("ERROR");
@@ -45,7 +45,7 @@ void *thread2(void *t){
 	
 	if (res >= 0) {
 			printf("%lu\n", res);
-			global = res;
+			//global = res;
 	} else {	/* Printing the proper error description. */
 		perror("ERROR");
 	}
@@ -71,11 +71,11 @@ void *thread3(void *t){
 
 	//*((char *)global) = 14;
 	
-	//printf("mprotect: %d\n", mprotect((void *)global, 1, PROT_WRITE));
+	//printf("mprotect: %d\n", mprotect((void *)res, 10, PROT_WRITE));
 
 	//global += 4096*8;
-	printf("munmap: %d\n", munmap((void *)global, 4096));
-	printf("global: %lu \n", global);
+	printf("munmap: %d\n", munmap((void *)res, 4095));
+	//printf("global: %lu \n", global);
 	
 	return 0;
 }
